@@ -26,8 +26,11 @@ trace/traffic_tools/raw-trace/
 trace/traffic_tools/test.png
 trace/traffic_tools/test.sh
 
+data*
+
 # Python files
 *.pyc
+__pycache__/
 
 # Prerequisites
 *.d
@@ -87,3 +90,6 @@ build/
 tests/test
 
 *.swp
+
+# Editor
+.vscode/

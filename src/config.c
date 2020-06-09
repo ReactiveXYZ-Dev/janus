@@ -153,9 +153,12 @@ static struct network_t *expr_clone_network(struct expr_t const *expr) {
 static void jupiter_add_upgrade_group(char const *string, struct jupiter_sw_up_list_t *list) {
   int tot_read;
   char sw_type[256] = {0};
-  unsigned location, count, color;
+  char sw_data[256] = {0};
+  
+  unsigned location, color;
 
-  if (sscanf(string, "%[^-]-%u-%u-%u%n", sw_type, &location, &count, &color, &tot_read) <= 0) {
+  if (sscanf(string, "%[^-]-%u-%[^-]-%u%n", sw_type, &location, sw_data, &color,
+             &tot_read) <= 0) {
     panic("Bad format specifier for jupiter: %s", string);
   }
 
@@ -164,13 +167,37 @@ static void jupiter_add_upgrade_group(char const *string, struct jupiter_sw_up_l
   }
 
   list->size += 1;
-  list->sw_list = realloc(list->sw_list, sizeof(struct jupiter_sw_up_list_t) * list->size);
-  list->num_switches += count;
-
+  list->sw_list = realloc(list->sw_list, sizeof(struct jupiter_sw_up_t) * list->size);
   struct jupiter_sw_up_t *up = &list->sw_list[list->size-1];
-  up->count = count;
+
   up->location = location;
   up->color = color;
+
+  // check whether to using idxs or count
+  char* test = strstr(sw_data, "[");
+  if (test != NULL) {
+    char* cur = sw_data + 1;
+    unsigned idxs[256] = {0};
+    while (*cur != 0) {
+      idxs[up->count++] = (unsigned)atoi(cur);
+      while (*cur != ',' && *cur != ']') {
+        ++ cur;
+      }
+      ++ cur;
+    }
+
+    up->idxs = malloc(sizeof(unsigned) * up->count);
+    for (unsigned i = 0; i < up->count; ++i) {
+      up->idxs[i] = idxs[i];
+    }
+
+    up->using_idxs = 1;
+  } else {
+    up->count = (unsigned)atoi(sw_data);
+    up->using_idxs = 0;
+  }
+
+  list->num_switches += up->count;
 
   if (strcmp(sw_type, "core") == 0) {
     up->type = JST_CORE;
@@ -285,7 +312,6 @@ _jupiter_build_located_switch_group(struct expr_t *expr) {
   for (uint32_t i = 0; i < expr->upgrade_list.size; ++i) {
     nswitches += expr->upgrade_list.sw_list[i].count;
   }
-
   struct jupiter_located_switch_t *sws = malloc(sizeof(struct jupiter_located_switch_t) * nswitches);
   uint32_t idx = 0;
   for (uint32_t i = 0; i < expr->upgrade_list.size; ++i) {
@@ -294,10 +320,18 @@ _jupiter_build_located_switch_group(struct expr_t *expr) {
       sws[idx].color = up->color;
       sws[idx].type = up->type;
       sws[idx].pod = up->location;
+
+      uint32_t switch_idx;
+      if (up->using_idxs) {
+        switch_idx = up->idxs[j];
+      } else {
+        switch_idx = j;
+      }
+
       if (up->type == JST_CORE) {
-        sws[idx].sid = jupiter_get_core(expr->network, j);
+        sws[idx].sid = jupiter_get_core(expr->network, switch_idx);
       } else if (up->type == JST_AGG) {
-        sws[idx].sid = jupiter_get_agg(expr->network, up->location, j);
+        sws[idx].sid = jupiter_get_agg(expr->network, up->location, switch_idx);
       } else {
         panic("Unsupported type for located_switch: %d", up->type);
       }

@@ -16,6 +16,9 @@ void _panic(char const *fmt, ...);
 void _network_print_flows(struct dataplane_t *);
 void _text_block(char const *fmt, ...);
 
+#define DATA_BEGIN(key) printf("** DATA BEGIN [%s] **\n", key);
+#define DATA_END(key) printf("** DATA END [%s] **\n", key);
+
 #define panic(fmt, ...) { \
   _panic(fmt, __FILE__, __LINE__, __VA_ARGS__); \
 }
@@ -52,5 +55,6 @@ void _text_block(char const *fmt, ...);
 #define text_block_txt(fmt) { \
   _text_block(fmt, __FILE__, __LINE__); \
 }
+
 
 #endif

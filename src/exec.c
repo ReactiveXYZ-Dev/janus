@@ -356,6 +356,19 @@ risk_cost_t exec_plan_cost(
     struct exec_t *exec,
     struct expr_t const *expr, struct mop_t **mops,
     uint32_t nmops, trace_time_t start) {
+
+  DATA_BEGIN("PLAN");
+  // Print the switch ids involved in each plan
+  for (unsigned i = 0; i < nmops; ++i) {
+    struct jupiter_switch_mop_t *jup_mop =
+        (struct jupiter_switch_mop_t *)mops[i];
+    for (unsigned j = 0; j < jup_mop->nswitches; ++j) {
+      printf("%d/%d ", jup_mop->switches[j]->sid, jup_mop->switches[j]->pod);
+    }
+    printf("\n");
+  }
+  DATA_END("PLAN");
+
   if (!exec->net_dp)
     _exec_net_dp_create(exec, expr);
 
@@ -391,6 +404,37 @@ risk_cost_t exec_plan_cost(
       net->get_dataplane(net, dp);
       maxmin(dp);
 
+      DATA_BEGIN("LINK DETAILS");
+      struct link_t* link = dp->links;
+      while (link) {
+        printf("%d/%f/%f ", link->id, link->capacity, link->used);
+        printf("\n");
+        link = link->next;
+      }
+      DATA_END("LINK DETAILS");
+
+      DATA_BEGIN("LINK-FLOW MAPPING")
+      link = dp->links;
+      while (link) {
+        printf("%d/", link->id);
+        for (unsigned j = 0; j < link->nflows; ++j) {
+          printf("%d ", link->flows[j]->id);
+        }
+        printf("\n");
+        link = link->next;
+      }
+      DATA_END("LINK-FLOW MAPPING")
+
+      DATA_BEGIN("FLOW DETAILS");
+      struct flow_t* flow = dp->flows;
+      while (flow) {
+        printf("%d/%f/%f/%d/%d ", flow->id, flow->bw, flow->demand, flow->stor, flow->dtor);
+        printf("\n");
+        flow = flow->next;
+      }
+      // print flows information
+      DATA_END("FLOW DETAILS");
+
       running_time += 1;
       violations = dataplane_count_violations(dp, 0);
       subplan_cost += expr->risk_violation_cost->cost( expr->risk_violation_cost,
@@ -409,6 +453,9 @@ risk_cost_t exec_plan_cost(
   }
 
   // Include the rest of the idol time as part of the cost of the mop
+  if (expr->criteria_time->steps > running_time) {
+    warn("Adding cost for remainig idle time %d", expr->criteria_time->steps - running_time);
+  }
   for (uint32_t i = running_time; i < expr->criteria_time->steps; ++i) {
       iter->get(iter, &tm);
       if (!tm)

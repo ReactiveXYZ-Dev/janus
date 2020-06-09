@@ -653,7 +653,7 @@ _exec_pug_runner(struct exec_t *exec, struct expr_t const *expr) {
     if (pug->type != PUG_LONG) 
       _exec_mops_for_free(exec, expr, pug->mops, pug->nmops);
 
-    info("[%4d] Actual cost of the best plan (%02d) is: %4.3f : %4.3f",
+    info("[%4d] Actual cost of the best plan (%02d) is: %4.3f, estimated is %4.3f",
         at, pug->nmops, actual_cost, estimated_cost);
 
     result.at = i;

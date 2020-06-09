@@ -24,7 +24,7 @@ BINARY = netre
 CC ?= clang
 STD=gnu11
 
-#OPT = -O0 -pg -g
+# OPT = -O0 -pg -g
 #OPT = -O3 -pg -g
 OPT = -O3
 

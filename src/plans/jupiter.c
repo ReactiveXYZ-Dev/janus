@@ -30,6 +30,7 @@ _jupiter_add_switch_to_class(
 
 static void
 _jupiter_build_groups(struct jupiter_switch_plan_enumerator_t *planner) {
+  info("NUM SWITCHES, %d", planner->num_switches);
   for (int i = 0; i < planner->num_switches; ++i) {
     struct jupiter_located_switch_t *sw = &planner->switches[i];
     struct jupiter_group_t *group = _jupiter_get_group_for(&planner->multigroup, sw);
@@ -84,7 +85,6 @@ struct jupiter_switch_plan_enumerator_t *jupiter_switch_plan_enumerator_create(
 
   planner->iter = jupiter_switch_plan_enumerator_iterator;
 
-
   planner->multigroup.ngroups = ndegree;
   planner->multigroup.groups = malloc(sizeof(struct jupiter_group_t) * ndegree);
   memset(planner->multigroup.groups, 0, sizeof(struct jupiter_group_t) * ndegree);
@@ -99,7 +99,6 @@ struct jupiter_switch_plan_enumerator_t *jupiter_switch_plan_enumerator_create(
     struct jupiter_group_t *group = &planner->multigroup.groups[i];
     group->group_size = MIN(freedom_degree[i], _max_class_size(group));
   }
-
 
   return planner;
 }

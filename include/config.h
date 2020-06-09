@@ -8,7 +8,15 @@
 
 struct jupiter_sw_up_t {
   enum JUPITER_SWITCH_TYPE type;
-  unsigned location; unsigned count; unsigned color;
+  unsigned location; 
+  unsigned color;
+
+  // either this...
+  unsigned count;
+  // or this combined with above...
+  unsigned* idxs;
+
+  unsigned using_idxs;
 };
 
 struct jupiter_sw_up_list_t {
