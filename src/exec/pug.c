@@ -589,7 +589,7 @@ _exec_pug_validate(struct exec_t *exec, struct expr_t const *expr) {
     panic("Couldn't load the traffic matrix file: %s", expr->traffic_test);
 
   pug->trace_training = traffic_matrix_trace_load(400, expr->traffic_training);
-  if (pug->trace == 0)
+  if (pug->trace_training == 0)
     panic("Couldn't load the training traffic matrix file: %s", expr->traffic_test);
 
   pug->pred = exec_predictor_create(exec, expr, expr->predictor_string);

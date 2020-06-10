@@ -93,3 +93,6 @@ tests/test
 
 # Editor
 .vscode/
+
+# Notebook
+.ipynb_checkpoints/

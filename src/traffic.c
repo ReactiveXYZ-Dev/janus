@@ -130,7 +130,6 @@ struct traffic_matrix_t *traffic_matrix_load(FILE *f) {
   long seek = -((long)size);
   fseek(f, seek, SEEK_CUR);
   size = sizeof(struct traffic_matrix_t) + tm.num_pairs * sizeof(struct pair_bw_t);
-
   /* Read the file */
   struct traffic_matrix_t *ret = malloc(size);
   // XXX: Bad idea: if the data-structures change we cannot just "read" the files anymore
@@ -501,13 +500,15 @@ struct traffic_matrix_trace_t *traffic_matrix_trace_load(
 
   _traffic_matrix_trace_load_indices(trace);
 
+  // traffic_matrix_trace_print_index(trace);
+
   return trace;
 }
 
 void traffic_matrix_trace_print_index(struct traffic_matrix_trace_t *t) {
   for (uint64_t i = 0; i < t->num_indices; ++i) {
-    //struct traffic_matrix_trace_index_t *index = &t->indices[i];
-    //printf("indices are: %lu  @%lu [:%lu]\n", index->size, index->time, index->seek);
+    struct traffic_matrix_trace_index_t *index = &t->indices[i];
+    printf("indices are: %lu  @%lu [:%lu]\n", index->size, index->time, index->seek);
   }
 }
 
